@@ -1,19 +1,15 @@
 # Commz
+A little AI enhanced Chat app a friend and i build for thm
 
-## Setup:
+## Setup
 #### Clone the repository:
 ```
-git clone --recurse-submodules ssh://git@team6-managing.mni.thm.de:222/Commz/infrastructure.git
-```
-#### Update submodules:
-```
-cd infrastructure
-git submodule update --remote --merge
+git clone git@github.com:nilspolek/Commz.git
 ```
 
 #### Run the infrastructure:
 ```
-cd infrastructure
+cd Commz
 docker compose build
 docker compose up -d
 ```
