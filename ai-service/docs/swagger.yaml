@@ -1,0 +1,71 @@
+definitions:
+  handlers.TextManipulationRequest:
+    properties:
+      text:
+        type: string
+    type: object
+  utils.ServiceError:
+    properties:
+      code:
+        type: integer
+      error:
+        type: string
+      message:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: This is the API for the AI service
+  title: AI Service API
+  version: "1.0"
+paths:
+  /guess:
+    post:
+      consumes:
+        - application/json
+      description: Gives a list of words for that specific topic
+      parameters:
+        - description: Authenticated user JWT token
+          in: header
+          name: commz-token
+          required: true
+          type: string
+        - description: the topic for the words to generate
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/handlers.TextManipulationRequest"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: generated words
+          schema:
+            items:
+              type: string
+            type: array
+        "400":
+          description: Invalid request body or user ID
+          schema:
+            $ref: "#/definitions/utils.ServiceError"
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: "#/definitions/utils.ServiceError"
+        "500":
+          description: Internal server error
+          schema:
+            $ref: "#/definitions/utils.ServiceError"
+      summary: Gives a list of words for that specific topic
+      tags:
+        - ai
+  /version:
+    get:
+      responses:
+        "200":
+          description: version
+          schema:
+            type: string
+      summary: Get the service Version
+swagger: "2.0"

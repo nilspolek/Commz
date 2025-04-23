@@ -1,0 +1,5 @@
+services:
+  ollama:
+    image: team6-managing.mni.thm.de:3000/commz/ollama:latest
+    ports:
+      - "11434:11434"

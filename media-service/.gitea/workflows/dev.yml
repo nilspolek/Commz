@@ -1,0 +1,30 @@
+name: Test, Build and Deploy Dev
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy-dev:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build and Push Docker image
+        run: |
+          docker login team6-managing.mni.thm.de:3000 -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          docker build --no-cache -t team6-managing.mni.thm.de:3000/commz/media-service:${{ gitea.sha }} . --push
+      - name: Set up Kubernetes CLI (kubectl)
+        run: |
+          curl -LO https://dl.k8s.io/release/v1.24.3/bin/linux/amd64/kubectl
+          chmod +x ./kubectl
+          sudo mv ./kubectl /usr/local/bin/kubectl
+      - name: Authenticate with Kubernetes Cluster
+        run: |
+          echo "${{secrets.K8S_SECRET}}" > kubeconfig
+          export KUBECONFIG=kubeconfig
+          kubectl config use-context dev
+          kubectl set image deployment/media-service media-service=team6-managing.mni.thm.de/commz/media-service:${{ gitea.sha }}
+          kubectl rollout status deployment/media-service

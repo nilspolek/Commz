@@ -1,0 +1,15 @@
+name: Build and Push to registry
+on: [push]
+
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build and Push Docker image
+        run: |
+          docker login team6-managing.mni.thm.de:3000 -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          docker build --no-cache -t team6-managing.mni.thm.de:3000/commz/frontend:${{ gitea.sha }} . --push

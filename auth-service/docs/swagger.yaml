@@ -1,0 +1,327 @@
+definitions:
+  handlers.ChangePasswordRequest:
+    description: Registration request model
+    properties:
+      current_password:
+        description: |-
+          User's password
+          @example secretpassword123
+        example: secretpassword123
+        minLength: 6
+        type: string
+      new_password:
+        description: |-
+          User's password
+          @example secretpassword123
+        example: secretpassword123
+        minLength: 6
+        type: string
+    required:
+    - current_password
+    - new_password
+    type: object
+  handlers.LoginUserRequest:
+    description: Login request model
+    properties:
+      email:
+        description: |-
+          User's email address
+          @example john.doe@example.com
+        example: john.doe@example.com
+        type: string
+      password:
+        description: |-
+          User's password
+          @example secretpassword123
+        example: secretpassword123
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  handlers.RegisterUserRequest:
+    description: Registration request model
+    properties:
+      email:
+        description: |-
+          User's email address
+          @example john.doe@example.com
+        example: john.doe@example.com
+        type: string
+      first_name:
+        description: |-
+          User's first name
+          @example John
+        example: John
+        type: string
+      last_name:
+        description: |-
+          User's last name
+          @example Doe
+        example: Doe
+        type: string
+      password:
+        description: |-
+          User's password
+          @example secretpassword123
+        example: secretpassword123
+        minLength: 6
+        type: string
+    required:
+    - email
+    - first_name
+    - last_name
+    - password
+    type: object
+  handlers.UpdateUserRequest:
+    description: Update request model
+    properties:
+      email:
+        description: |-
+          User's email address
+          @example john.doe@example.com
+        example: john.doe@example.com
+        type: string
+      first_name:
+        description: '@example John'
+        example: John
+        type: string
+      last_name:
+        description: |-
+          User's last name
+          @example Doe
+        example: Doe
+        type: string
+    required:
+    - email
+    - first_name
+    - last_name
+    type: object
+  handlers.VerifyTokenRequest:
+    description: Token verification request model
+    properties:
+      token:
+        description: |-
+          JWT token to verify
+          @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+    required:
+    - token
+    type: object
+  utils.ServiceError:
+    properties:
+      code:
+        type: integer
+      error:
+        type: string
+    type: object
+  utils.User:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: string
+      last_name:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user and returns a JWT token
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.LoginUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User information with JWT token in cookie
+          schema:
+            $ref: '#/definitions/utils.User'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+      summary: Login user
+      tags:
+      - auth
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user account
+      parameters:
+      - description: User registration details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.RegisterUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Created user information
+          schema:
+            $ref: '#/definitions/utils.User'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "409":
+          description: Email already exists
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+      summary: Register new user
+      tags:
+      - auth
+  /user:
+    put:
+      consumes:
+      - application/json
+      description: Updates a user account
+      parameters:
+      - description: User registration details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Created user information
+          schema:
+            $ref: '#/definitions/utils.User'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "409":
+          description: Email already exists
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+      summary: Update user
+      tags:
+      - auth
+  /user/password:
+    put:
+      consumes:
+      - application/json
+      description: Change a users password
+      parameters:
+      - description: User registration details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.ChangePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Created user information
+          schema:
+            $ref: '#/definitions/utils.User'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "409":
+          description: Email already exists
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+      summary: Change users password
+      tags:
+      - auth
+  /users:
+    get:
+      description: Retrieves the currently logged in user
+      parameters:
+      - description: Authenticated user JWT token
+        in: header
+        name: commz-token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Logged in user
+          schema:
+            $ref: '#/definitions/utils.User'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+      summary: Get user
+      tags:
+      - auth
+  /verify:
+    post:
+      consumes:
+      - application/json
+      description: Validates a JWT token and returns the associated user information
+      parameters:
+      - description: Token verification request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.VerifyTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User information
+          schema:
+            $ref: '#/definitions/utils.User'
+        "400":
+          description: Invalid request body or missing token
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "401":
+          description: Invalid or expired token
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+      summary: Verify JWT token
+      tags:
+      - auth
+swagger: "2.0"

@@ -1,0 +1,25 @@
+name: Feature Request
+about: Request a specifc new feature
+title: "Feat: "
+body:
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Feature Description
+      description: Detailed description about the feature
+      placeholder: The user should be able to direct message to a different person
+      value: ""
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: What priority does this feature have?
+      options:
+        - Low
+        - Medium
+        - High
+        - Urgent
+    validations:
+      required: true

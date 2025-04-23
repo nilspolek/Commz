@@ -1,0 +1,25 @@
+name: Pullrequest Template
+about: Pullrequest
+title: "Feat: "
+body:
+  - type: textarea
+    id: pr-description
+    attributes:
+      label: PR Description
+      description: Detailed description about changes that are introduced with this PR.
+      placeholder: Added user service
+      value: ""
+    validations:
+      required: true
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      description: Relevant points to check before merge
+      options:
+        - label: Does this PR introduce breaking changes?
+          required: false
+        - label: Have the tests been updated to account for new features?
+          required: true
+        - label: Is the documentation updated?
+          required: true

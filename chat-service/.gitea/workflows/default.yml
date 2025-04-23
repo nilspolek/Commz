@@ -1,0 +1,38 @@
+name: Test, Build and Deploy Production
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build and Push Docker image
+        run: |
+          docker login team6-managing.mni.thm.de:3000 -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          docker build --no-cache -t team6-managing.mni.thm.de:3000/commz/chat-service:${{ gitea.sha }} . --push
+  test:
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Install Go
+        run: |
+          curl -O -L https://go.dev/dl/go1.23.5.linux-amd64.tar.gz
+          rm -rf /usr/local/go && tar -C /usr/local -xzf go1.23.5.linux-amd64.tar.gz
+          export PATH=$PATH:/usr/local/go/bin
+          go version
+      - name: Run tests
+        run: |
+          /usr/local/go/bin/go test ./...
+  sonarqube:
+    runs-on: ubuntu-latest
+    container:
+      image: sonarsource/sonar-scanner-cli:4
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Scan container
+        run: |
+          sonar-scanner -Dsonar.projectKey=devops-chat-service -Dsonar.sources=. -Dsonar.host.url=https://scm.thm.de/sonar -Dsonar.login=$SONAR_PRIVATE_KEY

@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f ../compose.yml
+    kompose.version: 1.35.0 (HEAD)
+  labels:
+    io.kompose.service: frontend
+  name: frontend
+spec:
+  type: NodePort
+  ports:
+    - name: "4173"
+      port: 4173
+      targetPort: 4173
+  selector:
+    io.kompose.service: frontend
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f ../compose.yml
+    kompose.version: 1.35.0 (HEAD)
+  labels:
+    io.kompose.service: frontend
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: frontend
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f ../compose.yml
+        kompose.version: 1.35.0 (HEAD)
+      labels:
+        io.kompose.service: frontend
+    spec:
+      containers:
+        - env:
+            - name: GATEWAY_URL
+              value: http://team6-prod.mni.thm.de
+          image: team6-managing.mni.thm.de:3000/commz/frontend:5c64aac0b32cf2f7005e37032e6777cd551ebdfb
+          name: frontend
+          ports:
+            - containerPort: 4173
+              protocol: TCP
+      restartPolicy: Always

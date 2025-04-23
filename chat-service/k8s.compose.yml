@@ -1,0 +1,8 @@
+services:
+  chat-service:
+    image: team6-managing.mni.thm.de:3000/commz/chat-service
+    container_name: chat-service
+    ports:
+      - "8080:8080"
+    environment:
+      - ENABLE_SWAGGER=true

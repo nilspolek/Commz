@@ -1,0 +1,18 @@
+[submodule "frontend"]
+	path = frontend
+	url = ssh://git@team6-managing.mni.thm.de:222/Commz/frontend.git
+[submodule "ai-service"]
+	path = ai-service
+	url = ssh://git@team6-managing.mni.thm.de:222/Commz/ai-service.git
+[submodule "chat-service"]
+	path = chat-service
+	url = ssh://git@team6-managing.mni.thm.de:222/Commz/chat-service.git
+[submodule "gateway"]
+	path = gateway
+	url = ssh://git@team6-managing.mni.thm.de:222/Commz/gateway.git
+[submodule "auth-service"]
+	path = auth-service
+	url = ssh://git@team6-managing.mni.thm.de:222/Commz/auth-service.git
+[submodule "media-service"]
+	path = media-service
+	url = ssh://git@team6-managing.mni.thm.de:222/Commz/media-service.git

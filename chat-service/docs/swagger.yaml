@@ -1,0 +1,631 @@
+definitions:
+  handlers.CreateChatRequest:
+    properties:
+      members:
+        description: |-
+          List of user IDs to add to the chat
+          required: true
+          minimum items: 1
+        items:
+          type: string
+        type: array
+      message:
+        description: |-
+          The initial message to send
+          required: true
+        type: string
+      name:
+        description: |-
+          Name of the group chat
+          required: true
+        type: string
+    type: object
+  handlers.SendMessageRequest:
+    properties:
+      command:
+        type: string
+      media:
+        items:
+          type: string
+        type: array
+      message:
+        description: |-
+          The message content
+          required: true
+          min length: 1
+        type: string
+      reply_to:
+        type: string
+    type: object
+  handlers.StartDirectMessageRequest:
+    properties:
+      message:
+        description: |-
+          The initial message to send
+          required: true
+        type: string
+      receiver:
+        description: |-
+          The ID of the user to start a chat with
+          required: true
+        type: string
+    type: object
+  utils.Chat:
+    properties:
+      created_at:
+        type: string
+      creator_id:
+        type: string
+      id:
+        type: string
+      last_active:
+        type: string
+      members:
+        items:
+          type: string
+        type: array
+      messages:
+        items:
+          $ref: '#/definitions/utils.Message'
+        type: array
+      name:
+        type: string
+    type: object
+  utils.Message:
+    properties:
+      chat_id:
+        type: string
+      command:
+        type: string
+      content:
+        type: string
+      deleted:
+        type: boolean
+      id:
+        type: string
+      media:
+        items:
+          type: string
+        type: array
+      read:
+        type: boolean
+      reply_to:
+        type: string
+      sender:
+        type: string
+      timestamp:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  utils.ServiceError:
+    properties:
+      code:
+        type: integer
+      error:
+        type: string
+      message:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: This is the API for the Chat service
+  title: Chat Service API
+  version: "1.0"
+paths:
+  /:
+    get:
+      description: Retrieves all chats (both direct and group) that the authenticated
+        user is a member of
+      parameters:
+      - description: Authenticated user JWT token
+        in: header
+        name: commz-token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of chats
+          schema:
+            items:
+              $ref: '#/definitions/utils.Chat'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+      security:
+      - ApiKeyAuth: []
+      summary: Get user's chats
+      tags:
+      - chat
+    post:
+      consumes:
+      - application/json
+      description: Creates a new group chat with multiple members
+      parameters:
+      - description: Authenticated user JWT token
+        in: header
+        name: commz-token
+        required: true
+        type: string
+      - description: Group chat creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateChatRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Chat creation successful
+          schema:
+            $ref: '#/definitions/utils.Chat'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "404":
+          description: One or more users not found
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a group chat
+      tags:
+      - chat
+  /{chatId}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes an exsisting chat, the user has to be part of that chat.
+      parameters:
+      - description: Authenticated user JWT token
+        in: header
+        name: commz-token
+        required: true
+        type: string
+      - description: Chat ID
+        in: path
+        name: chatId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Chat deleted
+          schema:
+            type: boolean
+        "400":
+          description: Invalid request body or chat ID
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "404":
+          description: Chat not found
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a chat
+      tags:
+      - chat
+    get:
+      consumes:
+      - application/json
+      description: Returns the chat with that ID
+      parameters:
+      - description: Authenticated user JWT token
+        in: header
+        name: commz-token
+        required: true
+        type: string
+      - description: Chat ID
+        in: path
+        name: chatId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Chat Found
+          schema:
+            $ref: '#/definitions/utils.Chat'
+        "400":
+          description: Invalid request body or Chat ID
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "404":
+          description: Chat not found
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+      security:
+      - ApiKeyAuth: []
+      summary: Gets a specific chat by ID
+      tags:
+      - chat
+    put:
+      consumes:
+      - application/json
+      description: Updates achat between the authenticated user other users
+      parameters:
+      - description: Authenticated user JWT token
+        in: header
+        name: commz-token
+        required: true
+        type: string
+      - description: Chat ID
+        in: path
+        name: chatId
+        required: true
+        type: string
+      - description: Direct chat creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateChatRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Chat creation successful
+          schema:
+            $ref: '#/definitions/utils.Chat'
+        "400":
+          description: Invalid request body or chat ID
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "404":
+          description: Chat not found
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+      security:
+      - ApiKeyAuth: []
+      summary: Updates a chat between users
+      tags:
+      - chat
+  /{chatId}/messages:
+    get:
+      description: Retrieves all messages from a specific chat
+      parameters:
+      - description: Authenticated user JWT token
+        in: header
+        name: commz-token
+        required: true
+        type: string
+      - description: Chat ID
+        format: uuid
+        in: path
+        name: chatId
+        required: true
+        type: string
+      - default: 50
+        description: Number of messages to return
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Number of messages to skip
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of chat messages
+          schema:
+            items:
+              $ref: '#/definitions/utils.Message'
+            type: array
+        "400":
+          description: Invalid chat ID
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "403":
+          description: User not member of chat
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "404":
+          description: Chat not found
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+      security:
+      - ApiKeyAuth: []
+      summary: Get chat messages
+      tags:
+      - chat
+    post:
+      consumes:
+      - application/json
+      description: Sends a new message to a specific chat
+      parameters:
+      - description: Authenticated user JWT token
+        in: header
+        name: commz-token
+        required: true
+        type: string
+      - description: Chat ID
+        format: uuid
+        in: path
+        name: chatId
+        required: true
+        type: string
+      - description: Message content
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.SendMessageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Message sent successfully
+          schema:
+            $ref: '#/definitions/utils.Message'
+        "400":
+          description: Invalid request body or chat ID
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "403":
+          description: User not member of chat
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "404":
+          description: Chat not found
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+      security:
+      - ApiKeyAuth: []
+      summary: Send chat message
+      tags:
+      - chat
+  /direct-chat:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new direct chat between the authenticated user and another
+        user
+      parameters:
+      - description: Authenticated user JWT token
+        in: header
+        name: commz-token
+        required: true
+        type: string
+      - description: Receiver user ID
+        in: path
+        name: userid
+        required: true
+        type: string
+      - description: Direct chat creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.StartDirectMessageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Chat creation successful
+          schema:
+            $ref: '#/definitions/utils.Chat'
+        "400":
+          description: Invalid request body or user ID
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a direct chat between two users
+      tags:
+      - chat
+  /messages/{messageId}:
+    delete:
+      consumes:
+      - application/json
+      description: returns the deleted message
+      parameters:
+      - description: Authenticated user JWT token
+        in: header
+        name: commz-token
+        required: true
+        type: string
+      - description: Message ID
+        in: path
+        name: messageId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Message Deleted
+          schema:
+            $ref: '#/definitions/utils.Message'
+        "400":
+          description: Invalid request body or Chat ID
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "404":
+          description: Chat not found
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a message by id
+      tags:
+      - chat
+    put:
+      consumes:
+      - application/json
+      description: returns the updated message
+      parameters:
+      - description: Authenticated user JWT token
+        in: header
+        name: commz-token
+        required: true
+        type: string
+      - description: Message ID
+        in: path
+        name: messageId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Message Updated
+          schema:
+            $ref: '#/definitions/handlers.SendMessageRequest'
+        "400":
+          description: Invalid request body or Chat ID
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "404":
+          description: Chat not found
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+      security:
+      - ApiKeyAuth: []
+      summary: Update a message by id
+      tags:
+      - chat
+  /messages/{messageId}/read:
+    get:
+      consumes:
+      - application/json
+      description: returns the updated message
+      parameters:
+      - description: Authenticated user JWT token
+        in: header
+        name: commz-token
+        required: true
+        type: string
+      - description: Message ID
+        in: path
+        name: messageId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Message Updated
+          schema:
+            $ref: '#/definitions/handlers.SendMessageRequest'
+        "400":
+          description: Invalid request body or Chat ID
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "404":
+          description: Chat not found or message not found
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ServiceError'
+      security:
+      - ApiKeyAuth: []
+      summary: Sets the status of a message to read
+      tags:
+      - chat
+  /version:
+    get:
+      responses:
+        "200":
+          description: version
+          schema:
+            type: string
+      summary: Get the service Version
+swagger: "2.0"
